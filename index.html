@@ -78,10 +78,11 @@
   .grid {
     display: grid;
     grid-template-columns: 44px repeat(8, 1fr);
-    gap: 8px;
+    column-gap: 8px;
+    row-gap: 12px;
     align-items: stretch;
     flex: 1 1 auto;
-    margin: 0 auto 28px;
+    margin: 0 auto 32px;
     width: 100%;
     max-width: 520px;
   }
@@ -110,8 +111,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 240, 228, 0.7),
       inset 0 -2px 0 rgba(180, 110, 90, 0.25),
-      0 3px 0 #d99880,
-      0 5px 8px rgba(74, 31, 36, 0.08);
+      0 2px 0 #d99880;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -135,8 +135,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
       inset 0 -2px 0 rgba(230, 160, 130, 0.5),
-      0 3px 0 var(--pad-on-edge),
-      0 5px 9px rgba(255, 130, 90, 0.18);
+      0 2px 0 var(--pad-on-edge);
   }
   .pad.on svg.paw {
     opacity: 1;
@@ -147,8 +146,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 240, 228, 0.5),
       inset 0 -1px 0 rgba(180, 110, 90, 0.2),
-      0 1px 0 #d99880,
-      0 2px 4px rgba(74, 31, 36, 0.06);
+      0 0 0 #d99880;
   }
   .pad.playhead::after {
     content: '';
@@ -188,8 +186,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
       inset 0 -3px 0 rgba(230, 164, 142, 0.55),
-      0 4px 0 #e6a48e,
-      0 7px 12px rgba(74, 31, 36, 0.12);
+      0 4px 0 #e6a48e;
     transition: transform 0.09s ease, box-shadow 0.09s ease, background 0.18s ease, color 0.18s ease;
   }
   .mood:active {
@@ -197,8 +194,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.6),
       inset 0 -1px 0 rgba(230, 164, 142, 0.4),
-      0 1px 0 #e6a48e,
-      0 2px 5px rgba(74, 31, 36, 0.1);
+      0 1px 0 #e6a48e;
   }
   .mood {
     text-shadow:
@@ -214,16 +210,14 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 220, 200, 0.75),
       inset 0 -3px 0 rgba(170, 50, 30, 0.4),
-      0 4px 0 var(--accent-deep),
-      0 7px 14px rgba(210, 75, 48, 0.35);
+      0 4px 0 var(--accent-deep);
   }
   .mood.active:active {
     transform: translateY(3px);
     box-shadow:
       inset 0 1px 0 rgba(255, 220, 200, 0.5),
       inset 0 -1px 0 rgba(170, 50, 30, 0.3),
-      0 1px 0 var(--accent-deep),
-      0 2px 6px rgba(210, 75, 48, 0.25);
+      0 1px 0 var(--accent-deep);
   }
 
   .footer {
@@ -265,8 +259,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 220, 200, 0.85),
       inset 0 -4px 0 rgba(170, 50, 30, 0.45),
-      0 5px 0 var(--accent-deep),
-      0 9px 16px rgba(210, 75, 48, 0.32);
+      0 5px 0 var(--accent-deep);
   }
   .pill.play svg {
     color: #b8421e;
@@ -279,8 +272,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 220, 200, 0.55),
       inset 0 -1px 0 rgba(170, 50, 30, 0.3),
-      0 1px 0 var(--accent-deep),
-      0 3px 8px rgba(210, 75, 48, 0.22);
+      0 1px 0 var(--accent-deep);
   }
   .pill.shuffle {
     color: #8a4b50;
@@ -291,8 +283,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
       inset 0 -4px 0 rgba(230, 164, 142, 0.55),
-      0 5px 0 #e6a48e,
-      0 9px 16px rgba(74, 31, 36, 0.14);
+      0 5px 0 #e6a48e;
   }
   .pill.shuffle svg {
     color: #c98876;
@@ -305,8 +296,7 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.65),
       inset 0 -1px 0 rgba(230, 164, 142, 0.4),
-      0 1px 0 #e6a48e,
-      0 3px 8px rgba(74, 31, 36, 0.1);
+      0 1px 0 #e6a48e;
   }
 
   .alteru-stamp {
@@ -323,14 +313,16 @@
   @media (max-height: 720px) {
     .title { font-size: 26px; }
     .title-mark { width: 24px; height: 24px; }
-    .grid { gap: 5px; }
+    .grid { column-gap: 6px; row-gap: 10px; margin-bottom: 24px; }
     .lane-mark svg { width: 26px; height: 26px; }
+    .moods { margin-bottom: 20px; }
   }
   @media (max-width: 360px) {
-    .grid { grid-template-columns: 36px repeat(8, 1fr); gap: 4px; }
+    .grid { grid-template-columns: 36px repeat(8, 1fr); column-gap: 5px; row-gap: 9px; }
     .lane-mark svg { width: 22px; height: 22px; }
     .mood { font-size: 12px; letter-spacing: 1px; }
     .pill { font-size: 15px; }
+    .moods, .footer { gap: 12px; }
   }
 </style>
 </head>
