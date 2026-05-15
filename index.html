@@ -105,14 +105,18 @@
   .pad {
     aspect-ratio: 1 / 1;
     border-radius: 14px;
-    background: var(--pad-off);
-    box-shadow: var(--shadow);
-    border: 2px solid var(--pad-off-edge);
+    border: none;
+    background: linear-gradient(180deg, #f9cdb9 0%, #efb09a 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 240, 228, 0.7),
+      inset 0 -2px 0 rgba(180, 110, 90, 0.25),
+      0 3px 0 #d99880,
+      0 5px 8px rgba(74, 31, 36, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 0.08s ease, background 0.12s ease, border-color 0.12s ease;
+    transition: transform 0.08s ease, background 0.12s ease, box-shadow 0.12s ease;
     position: relative;
     touch-action: none;
   }
@@ -122,16 +126,28 @@
     opacity: 0;
     transform: scale(0.6) rotate(-12deg);
     transition: opacity 0.12s ease, transform 0.12s ease;
+    filter: drop-shadow(0 1px 0 rgba(74, 31, 36, 0.08));
   }
   .pad.on {
-    background: var(--pad-on);
-    border-color: var(--pad-on-edge);
+    background: linear-gradient(180deg, #ffffff 0%, #ffe9d8 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -2px 0 rgba(230, 160, 130, 0.5),
+      0 3px 0 var(--pad-on-edge),
+      0 5px 9px rgba(255, 130, 90, 0.18);
   }
   .pad.on svg.paw {
     opacity: 1;
     transform: scale(1) rotate(-6deg);
   }
-  .pad:active { transform: scale(0.92); }
+  .pad:active {
+    transform: translateY(2px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 240, 228, 0.5),
+      inset 0 -1px 0 rgba(180, 110, 90, 0.2),
+      0 1px 0 #d99880,
+      0 2px 4px rgba(74, 31, 36, 0.06);
+  }
   .pad.playhead::after {
     content: '';
     position: absolute;
@@ -148,32 +164,56 @@
 
   .moods {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
     max-width: 520px;
-    margin: 0 auto 14px;
+    margin: 0 auto 18px;
     width: 100%;
   }
   .mood {
     flex: 1 1 0;
-    padding: 12px 0;
-    border-radius: 16px;
-    background: #fff;
-    border: 2px solid var(--pad-off-edge);
+    padding: 13px 0 14px;
+    border-radius: 18px;
+    border: none;
     color: var(--ink);
     font-family: inherit;
     font-weight: 700;
     font-size: 14px;
     letter-spacing: 1.5px;
-    box-shadow: var(--shadow);
     cursor: pointer;
-    transition: transform 0.08s ease, background 0.12s ease, color 0.12s ease;
+    position: relative;
+    background: linear-gradient(180deg, #ffffff 0%, #ffeadc 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -3px 0 rgba(230, 164, 142, 0.55),
+      0 4px 0 #e6a48e,
+      0 7px 12px rgba(74, 31, 36, 0.12);
+    transition: transform 0.09s ease, box-shadow 0.09s ease, background 0.18s ease, color 0.18s ease;
   }
-  .mood:active { transform: scale(0.96); }
+  .mood:active {
+    transform: translateY(3px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(230, 164, 142, 0.4),
+      0 1px 0 #e6a48e,
+      0 2px 5px rgba(74, 31, 36, 0.1);
+  }
   .mood.active {
-    background: var(--accent);
     color: #fff;
-    border-color: var(--accent-deep);
+    background: linear-gradient(180deg, #ffa382 0%, #ff7754 55%, #ef5e3e 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 200, 0.75),
+      inset 0 -3px 0 rgba(170, 50, 30, 0.4),
+      0 4px 0 var(--accent-deep),
+      0 7px 14px rgba(210, 75, 48, 0.35);
+  }
+  .mood.active:active {
+    transform: translateY(3px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 200, 0.5),
+      inset 0 -1px 0 rgba(170, 50, 30, 0.3),
+      0 1px 0 var(--accent-deep),
+      0 2px 6px rgba(210, 75, 48, 0.25);
   }
 
   .footer {
@@ -186,7 +226,7 @@
   }
   .pill {
     flex: 1 1 0;
-    padding: 16px 0;
+    padding: 16px 0 18px;
     border-radius: 999px;
     border: none;
     font-family: inherit;
@@ -194,27 +234,51 @@
     font-size: 17px;
     letter-spacing: 1px;
     cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: transform 0.08s ease;
+    transition: transform 0.09s ease, box-shadow 0.09s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    position: relative;
   }
   .pill svg {
     width: 20px;
     height: 20px;
     display: block;
   }
-  .pill:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(74, 31, 36, 0.12); }
   .pill.play {
-    background: var(--accent);
     color: #fff;
+    background: linear-gradient(180deg, #ffac8a 0%, #ff7754 50%, #ef5e3e 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 200, 0.85),
+      inset 0 -4px 0 rgba(170, 50, 30, 0.45),
+      0 5px 0 var(--accent-deep),
+      0 9px 16px rgba(210, 75, 48, 0.32);
+  }
+  .pill.play:active {
+    transform: translateY(4px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 200, 0.55),
+      inset 0 -1px 0 rgba(170, 50, 30, 0.3),
+      0 1px 0 var(--accent-deep),
+      0 3px 8px rgba(210, 75, 48, 0.22);
   }
   .pill.shuffle {
-    background: #fff;
     color: var(--ink);
-    border: 2px solid var(--pad-off-edge);
+    background: linear-gradient(180deg, #ffffff 0%, #ffe3d0 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -4px 0 rgba(230, 164, 142, 0.55),
+      0 5px 0 #e6a48e,
+      0 9px 16px rgba(74, 31, 36, 0.14);
+  }
+  .pill.shuffle:active {
+    transform: translateY(4px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -1px 0 rgba(230, 164, 142, 0.4),
+      0 1px 0 #e6a48e,
+      0 3px 8px rgba(74, 31, 36, 0.1);
   }
 
   .alteru-stamp {
