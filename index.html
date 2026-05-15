@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#ffe6d6" />
+<meta name="description" content="A tiny cat orchestra — tap to make 8 cats sing together" />
+<title>Meow Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-top: #ffeede;
+    --bg-bot: #ffd5c4;
+    --ink:    #4a1f24;
+    --ink-soft: #7d4b50;
+    --pad-off: #f6c8b4;
+    --pad-off-edge: #e6a48e;
+    --pad-on:  #ffffff;
+    --pad-on-edge: #ffae87;
+    --accent: #ff7754;
+    --accent-deep: #d24b30;
+    --playhead: #ffd84a;
+    --shadow: 0 4px 0 rgba(74, 31, 36, 0.10);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%;
+    min-height: 100%;
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bot) 100%);
+    color: var(--ink);
+    font-family: 'Fredoka', system-ui, -apple-system, "PingFang SC", sans-serif;
+    font-weight: 600;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 100vh;
+    padding: 22px 16px 64px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .title-mark {
+    width: 28px;
+    height: 28px;
+    color: var(--accent);
+  }
+  .subtitle {
+    margin-top: 4px;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 44px repeat(8, 1fr);
+    gap: 6px;
+    align-items: stretch;
+    flex: 1 1 auto;
+    margin: 0 auto 16px;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .lane-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    transition: transform 0.12s ease;
+  }
+  .lane-mark svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+  }
+  .lane-mark.hit {
+    transform: scale(1.35) rotate(-6deg);
+  }
+
+  .pad {
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    background: var(--pad-off);
+    box-shadow: var(--shadow);
+    border: 2px solid var(--pad-off-edge);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.12s ease, border-color 0.12s ease;
+    position: relative;
+    touch-action: none;
+  }
+  .pad svg.paw {
+    width: 58%;
+    height: 58%;
+    opacity: 0;
+    transform: scale(0.6) rotate(-12deg);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+  .pad.on {
+    background: var(--pad-on);
+    border-color: var(--pad-on-edge);
+  }
+  .pad.on svg.paw {
+    opacity: 1;
+    transform: scale(1) rotate(-6deg);
+  }
+  .pad:active { transform: scale(0.92); }
+  .pad.playhead::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 16px;
+    border: 3px solid var(--playhead);
+    pointer-events: none;
+    animation: rm-pulse 0.12s ease;
+  }
+  @keyframes rm-pulse {
+    from { transform: scale(0.92); opacity: 0.4; }
+    to   { transform: scale(1.0); opacity: 1; }
+  }
+
+  .moods {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    max-width: 520px;
+    margin: 0 auto 14px;
+    width: 100%;
+  }
+  .mood {
+    flex: 1 1 0;
+    padding: 12px 0;
+    border-radius: 16px;
+    background: #fff;
+    border: 2px solid var(--pad-off-edge);
+    color: var(--ink);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.12s ease, color 0.12s ease;
+  }
+  .mood:active { transform: scale(0.96); }
+  .mood.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent-deep);
+  }
+
+  .footer {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .pill {
+    flex: 1 1 0;
+    padding: 16px 0;
+    border-radius: 999px;
+    border: none;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.08s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .pill svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+  .pill:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(74, 31, 36, 0.12); }
+  .pill.play {
+    background: var(--accent);
+    color: #fff;
+  }
+  .pill.shuffle {
+    background: #fff;
+    color: var(--ink);
+    border: 2px solid var(--pad-off-edge);
+  }
+
+  .alteru-stamp {
+    position: fixed;
+    right: 14px;
+    bottom: 12px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(74, 31, 36, 0.35);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  @media (max-height: 720px) {
+    .title { font-size: 26px; }
+    .title-mark { width: 24px; height: 24px; }
+    .grid { gap: 5px; }
+    .lane-mark svg { width: 26px; height: 26px; }
+  }
+  @media (max-width: 360px) {
+    .grid { grid-template-columns: 36px repeat(8, 1fr); gap: 4px; }
+    .lane-mark svg { width: 22px; height: 22px; }
+    .mood { font-size: 12px; letter-spacing: 1px; }
+    .pill { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+  <!-- Hidden SVG defs reused across pads/lanes -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-cat" viewBox="0 0 64 64">
+        <path d="M16 6 L26 22 L10 22 Z" fill="currentColor"/>
+        <path d="M48 6 L54 22 L38 22 Z" fill="currentColor"/>
+        <ellipse cx="32" cy="38" rx="22" ry="20" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-paw" viewBox="0 0 64 64">
+        <ellipse cx="32" cy="44" rx="14" ry="11" fill="currentColor"/>
+        <ellipse cx="14" cy="30" rx="6" ry="8" fill="currentColor"/>
+        <ellipse cx="25" cy="18" rx="5.5" ry="7.5" fill="currentColor"/>
+        <ellipse cx="39" cy="18" rx="5.5" ry="7.5" fill="currentColor"/>
+        <ellipse cx="50" cy="30" rx="6" ry="8" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-play" viewBox="0 0 24 24">
+        <path d="M6 4 L20 12 L6 20 Z" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24">
+        <rect x="5"  y="4" width="5" height="16" rx="1" fill="currentColor"/>
+        <rect x="14" y="4" width="5" height="16" rx="1" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-shuffle" viewBox="0 0 24 24">
+        <path d="M3 6 L8 6 C10 6 11 7 12 9 L15 14 C16 16 17 17 19 17 L21 17 M3 17 L8 17 C10 17 11 16 12 14 L15 9 C16 7 17 6 19 6 L21 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 4 L22 6 L19 8 Z M19 15 L22 17 L19 19 Z" fill="currentColor"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="header">
+    <div class="title">
+      <svg class="title-mark"><use href="#i-paw"/></svg>
+      Meow Machine
+    </div>
+    <div class="subtitle">tap. cats sing.</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="moods" id="moods">
+    <button class="mood" data-mood="nap">NAP</button>
+    <button class="mood" data-mood="party">PARTY</button>
+    <button class="mood" data-mood="zoomies">ZOOMIES</button>
+  </div>
+
+  <div class="footer">
+    <button class="pill shuffle" id="shuffleBtn">
+      <svg><use href="#i-shuffle"/></svg>SHUFFLE
+    </button>
+    <button class="pill play" id="playBtn">
+      <svg id="playGlyph"><use href="#i-pause"/></svg><span id="playLabel">PAUSE</span>
+    </button>
+  </div>
+
+  <div class="alteru-stamp">AlterU</div>
+
+<script>
+  const STEPS = 8;
+
+  // 8 cats — each defined by ID, lane color (used for the cat-head icon and paw),
+  // and the synth recipe. The IDs map 1:1 to keys in `moods` patterns below.
+  const CATS = [
+    { id: 'mrow',  color: '#2a1820' },
+    { id: 'meow',  color: '#c46c3a' },
+    { id: 'chirp', color: '#e09a3a' },
+    { id: 'yowl',  color: '#7d4b50' },
+    { id: 'hiss',  color: '#5a4548' },
+    { id: 'click', color: '#9a6a4c' },
+    { id: 'purr',  color: '#e89a7a' },
+    { id: 'mew',   color: '#f0a55a' }
+  ];
+
+  const moods = {
+    nap: {
+      purr:  [1,0,0,0,1,0,0,0],
+      mew:   [0,0,0,0,0,0,1,0],
+      meow:  [0,0,0,1,0,0,0,0]
+    },
+    party: {
+      mrow:  [1,0,0,0,1,0,0,0],
+      meow:  [0,0,1,0,0,0,1,0],
+      chirp: [0,1,0,1,0,1,0,1],
+      click: [1,0,0,1,1,0,0,1],
+      mew:   [0,0,0,0,0,0,0,1]
+    },
+    zoomies: {
+      mrow:  [1,0,1,0,0,1,0,0],
+      chirp: [1,1,0,1,1,0,1,1],
+      click: [0,1,1,0,1,1,0,1],
+      mew:   [1,0,0,1,0,0,1,0]
+    }
+  };
+
+  let pattern = {};
+  CATS.forEach(c => { pattern[c.id] = new Array(STEPS).fill(0); });
+
+  let currentStep = 0;
+  let isPlaying = false;
+  let intervalId = null;
+  let audioCtx = null;
+
+  const grid = document.getElementById('grid');
+  const padNodes = {};
+  const laneNodes = {};
+
+  function buildGrid() {
+    grid.innerHTML = '';
+    CATS.forEach(c => {
+      const lane = document.createElement('div');
+      lane.className = 'lane-mark';
+      lane.style.color = c.color;
+      lane.innerHTML = '<svg><use href="#i-cat"/></svg>';
+      grid.appendChild(lane);
+      laneNodes[c.id] = lane;
+
+      padNodes[c.id] = [];
+      for (let s = 0; s < STEPS; s++) {
+        const pad = document.createElement('div');
+        pad.className = 'pad';
+        pad.dataset.cat = c.id;
+        pad.dataset.step = s;
+        pad.innerHTML = '<svg class="paw" style="color:' + c.color + '"><use href="#i-paw"/></svg>';
+        pad.addEventListener('pointerdown', onPadDown);
+        grid.appendChild(pad);
+        padNodes[c.id].push(pad);
+      }
+    });
+  }
+
+  function onPadDown(e) {
+    e.preventDefault();
+    const t = e.currentTarget;
+    const cat = t.dataset.cat;
+    const step = parseInt(t.dataset.step, 10);
+    const nv = pattern[cat][step] ? 0 : 1;
+    pattern[cat][step] = nv;
+    t.classList.toggle('on', !!nv);
+    clearMoodHighlight();
+  }
+
+  function clearMoodHighlight() {
+    document.querySelectorAll('.mood').forEach(b => b.classList.remove('active'));
+  }
+
+  function repaint() {
+    CATS.forEach(c => {
+      for (let s = 0; s < STEPS; s++) {
+        padNodes[c.id][s].classList.toggle('on', !!pattern[c.id][s]);
+      }
+    });
+  }
+
+  function loadMood(name) {
+    CATS.forEach(c => { pattern[c.id] = new Array(STEPS).fill(0); });
+    const m = moods[name] || {};
+    Object.keys(m).forEach(id => { pattern[id] = m[id].slice(); });
+    repaint();
+    document.querySelectorAll('.mood').forEach(b => b.classList.toggle('active', b.dataset.mood === name));
+  }
+
+  function shuffle() {
+    CATS.forEach(c => { pattern[c.id] = new Array(STEPS).fill(0); });
+    const laneCount = 2 + Math.floor(Math.random() * 3);
+    const chosen = [...CATS].sort(() => Math.random() - 0.5).slice(0, laneCount);
+    chosen.forEach(c => {
+      const hits = 2 + Math.floor(Math.random() * 3);
+      const positions = new Set();
+      while (positions.size < hits) positions.add(Math.floor(Math.random() * STEPS));
+      positions.forEach(p => { pattern[c.id][p] = 1; });
+    });
+    repaint();
+    clearMoodHighlight();
+  }
+
+  // ---- Sound synthesis ----
+  function ensureAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    return audioCtx;
+  }
+
+  function noiseBuf(seconds, shape) {
+    const sr = audioCtx.sampleRate;
+    const len = Math.max(1, Math.floor(sr * seconds));
+    const buf = audioCtx.createBuffer(1, len, sr);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      let v = Math.random() * 2 - 1;
+      if (shape) v *= shape(i / len);
+      d[i] = v;
+    }
+    return buf;
+  }
+  function bp(freq, q) { const f = audioCtx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = q || 6; return f; }
+  function hp(freq) { const f = audioCtx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = freq; return f; }
+  function lp(freq) { const f = audioCtx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq; return f; }
+
+  function meowVoice(opts) {
+    const now = audioCtx.currentTime;
+    const dest = audioCtx.destination;
+    const o = audioCtx.createOscillator();
+    o.type = 'sawtooth';
+    const env = audioCtx.createGain();
+    env.gain.setValueAtTime(0.0001, now);
+    env.gain.exponentialRampToValueAtTime(opts.gain, now + Math.min(0.04, opts.duration * 0.15));
+    env.gain.exponentialRampToValueAtTime(opts.gain * 0.55, now + opts.duration * 0.7);
+    env.gain.exponentialRampToValueAtTime(0.0001, now + opts.duration);
+    o.frequency.setValueAtTime(opts.pitchStart, now);
+    if (opts.pitchMid) o.frequency.exponentialRampToValueAtTime(opts.pitchMid, now + opts.duration * 0.35);
+    o.frequency.exponentialRampToValueAtTime(opts.pitchEnd, now + opts.duration);
+    if (opts.vibratoDepth) {
+      const lfo = audioCtx.createOscillator();
+      const lfoGain = audioCtx.createGain();
+      lfo.frequency.value = opts.vibratoHz || 5;
+      lfoGain.gain.value = opts.vibratoDepth;
+      lfo.connect(lfoGain); lfoGain.connect(o.frequency);
+      lfo.start(now); lfo.stop(now + opts.duration + 0.05);
+    }
+    const fA = bp(opts.formant1, 6);
+    const fB = bp(opts.formant2, 6);
+    const mix = audioCtx.createGain();
+    mix.gain.value = 1;
+    o.connect(fA); o.connect(fB);
+    fA.connect(mix); fB.connect(mix);
+    mix.connect(env); env.connect(dest);
+    o.start(now); o.stop(now + opts.duration + 0.05);
+  }
+
+  const synth = {
+    mrow:  () => meowVoice({ pitchStart: 200, pitchMid: 150, pitchEnd: 110, duration: 0.4,  formant1: 750, formant2: 1400, vibratoHz: 5, vibratoDepth: 8,  gain: 0.55 }),
+    meow:  () => meowVoice({ pitchStart: 320, pitchMid: 400, pitchEnd: 270, duration: 0.42, formant1: 900, formant2: 2200, vibratoHz: 6, vibratoDepth: 14, gain: 0.45 }),
+    chirp: () => {
+      const now = audioCtx.currentTime, dest = audioCtx.destination;
+      const o = audioCtx.createOscillator(); o.type = 'sawtooth';
+      o.frequency.setValueAtTime(550, now); o.frequency.exponentialRampToValueAtTime(820, now + 0.1);
+      const am = audioCtx.createOscillator(); am.frequency.value = 38;
+      const amGain = audioCtx.createGain(); amGain.gain.value = 0.35;
+      const env = audioCtx.createGain();
+      env.gain.setValueAtTime(0.0001, now);
+      env.gain.exponentialRampToValueAtTime(0.35, now + 0.01);
+      env.gain.exponentialRampToValueAtTime(0.0001, now + 0.13);
+      const f = bp(1700, 3);
+      am.connect(amGain); amGain.connect(env.gain);
+      o.connect(f); f.connect(env); env.connect(dest);
+      am.start(now); o.start(now);
+      am.stop(now + 0.14); o.stop(now + 0.14);
+    },
+    yowl:  () => meowVoice({ pitchStart: 240, pitchMid: 300, pitchEnd: 150, duration: 0.65, formant1: 700, formant2: 1900, vibratoHz: 5, vibratoDepth: 24, gain: 0.45 }),
+    hiss:  () => {
+      const now = audioCtx.currentTime, dest = audioCtx.destination;
+      const src = audioCtx.createBufferSource(); src.buffer = noiseBuf(0.25);
+      const f1 = hp(3500); const f2 = bp(6500, 1.2);
+      const env = audioCtx.createGain();
+      env.gain.setValueAtTime(0.0001, now);
+      env.gain.exponentialRampToValueAtTime(0.32, now + 0.012);
+      env.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+      src.connect(f1); f1.connect(f2); f2.connect(env); env.connect(dest);
+      src.start(now);
+    },
+    click: () => {
+      const now = audioCtx.currentTime, dest = audioCtx.destination;
+      const src = audioCtx.createBufferSource(); src.buffer = noiseBuf(0.02, t => Math.exp(-t * 10));
+      const f = hp(2500);
+      const env = audioCtx.createGain(); env.gain.value = 0.5;
+      src.connect(f); f.connect(env); env.connect(dest);
+      src.start(now);
+    },
+    purr:  () => {
+      const now = audioCtx.currentTime, dest = audioCtx.destination;
+      const dur = 0.55;
+      const o = audioCtx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 42;
+      const am = audioCtx.createOscillator(); am.frequency.value = 24;
+      const amGain = audioCtx.createGain(); amGain.gain.value = 0.4;
+      const env = audioCtx.createGain();
+      env.gain.setValueAtTime(0.0001, now);
+      env.gain.exponentialRampToValueAtTime(0.45, now + 0.05);
+      env.gain.setValueAtTime(0.45, now + dur - 0.12);
+      env.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      const noise = audioCtx.createBufferSource(); noise.buffer = noiseBuf(dur + 0.05);
+      const noiseLp = lp(240); const noiseGain = audioCtx.createGain(); noiseGain.gain.value = 0.14;
+      const filt = lp(900);
+      am.connect(amGain); amGain.connect(env.gain);
+      o.connect(filt); filt.connect(env);
+      noise.connect(noiseLp); noiseLp.connect(noiseGain); noiseGain.connect(env);
+      env.connect(dest);
+      am.start(now); o.start(now); noise.start(now);
+      am.stop(now + dur); o.stop(now + dur); noise.stop(now + dur);
+    },
+    mew:   () => meowVoice({ pitchStart: 750, pitchMid: 1150, pitchEnd: 950, duration: 0.22, formant1: 1700, formant2: 3100, vibratoHz: 9, vibratoDepth: 28, gain: 0.32 })
+  };
+
+  // ---- Transport ----
+  const TEMPO_BPM = 92;
+  const STEP_MS = (60 / TEMPO_BPM / 2) * 1000;
+
+  function tick() {
+    CATS.forEach(c => padNodes[c.id].forEach(p => p.classList.remove('playhead')));
+    CATS.forEach(c => {
+      const pad = padNodes[c.id][currentStep];
+      pad.classList.add('playhead');
+      if (pattern[c.id][currentStep]) {
+        if (audioCtx && audioCtx.state === 'running' && synth[c.id]) synth[c.id]();
+        const lane = laneNodes[c.id];
+        lane.classList.add('hit');
+        setTimeout(() => lane.classList.remove('hit'), 120);
+      }
+    });
+    currentStep = (currentStep + 1) % STEPS;
+  }
+
+  function setPlayGlyph(playing) {
+    const use = document.querySelector('#playGlyph use');
+    if (use) use.setAttribute('href', playing ? '#i-pause' : '#i-play');
+    document.getElementById('playLabel').textContent = playing ? 'PAUSE' : 'PLAY';
+  }
+
+  function startTransport() {
+    if (isPlaying) return;
+    isPlaying = true;
+    setPlayGlyph(true);
+    tick();
+    intervalId = setInterval(tick, STEP_MS);
+  }
+  function stopTransport() {
+    isPlaying = false;
+    if (intervalId) clearInterval(intervalId);
+    intervalId = null;
+    CATS.forEach(c => padNodes[c.id].forEach(p => p.classList.remove('playhead')));
+    setPlayGlyph(false);
+  }
+
+  document.getElementById('playBtn').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    ensureAudio();
+    if (isPlaying) stopTransport(); else startTransport();
+  });
+  document.getElementById('shuffleBtn').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    ensureAudio();
+    shuffle();
+    if (!isPlaying) startTransport();
+  });
+  document.querySelectorAll('.mood').forEach(btn => {
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      ensureAudio();
+      loadMood(btn.dataset.mood);
+      if (!isPlaying) startTransport();
+    });
+  });
+
+  // ---- Init ----
+  buildGrid();
+  const moodKeys = Object.keys(moods);
+  loadMood(moodKeys[Math.floor(Math.random() * moodKeys.length)]);
+
+  let pausedByVisibility = false;
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isPlaying) {
+      pausedByVisibility = true;
+      stopTransport();
+    } else if (!document.hidden) {
+      if (pausedByVisibility) {
+        pausedByVisibility = false;
+        if (!isPlaying) startTransport();
+      } else if (!isPlaying) {
+        startTransport();
+      }
+    }
+  });
+
+  function unlockAudioOnce() { ensureAudio(); }
+  document.addEventListener('pointerdown', unlockAudioOnce, { capture: true });
+  document.addEventListener('keydown', unlockAudioOnce, { capture: true });
+
+  if (!document.hidden) startTransport();
+</script>
+</body>
+</html>
