@@ -69,10 +69,16 @@
   }
   .subtitle {
     margin-top: 4px;
-    font-size: 10px;
-    letter-spacing: 3px;
+    font-size: 12px;
+    letter-spacing: 3.4px;
     color: var(--ink-soft);
     text-transform: uppercase;
+    animation: mm-hint-pulse 2.4s ease-in-out infinite;
+  }
+  .subtitle.hidden { opacity: 0; animation: none; transition: opacity 0.6s ease; }
+  @keyframes mm-hint-pulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
   }
 
   .grid {
@@ -457,6 +463,9 @@
 
   function onPadDown(e) {
     e.preventDefault();
+    // First-tap: fade the "tap. cats sing." hint subtitle.
+    const sub = document.querySelector('.subtitle');
+    if (sub && !sub.classList.contains('hidden')) sub.classList.add('hidden');
     const t = e.currentTarget;
     const cat = t.dataset.cat;
     const step = parseInt(t.dataset.step, 10);
